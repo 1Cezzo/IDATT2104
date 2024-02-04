@@ -82,23 +82,17 @@ private:
                     return;
                 }
 
-                if (!tasks.empty()) {
+                auto timedTaskToExecute = find_if(timedTasks.begin(), timedTasks.end(),
+                    [](const auto &timedTask) {
+                        return timedTask.first <= chrono::steady_clock::now();
+                    });
+
+                if (timedTaskToExecute != timedTasks.end()) {
+                    task = timedTaskToExecute->second;
+                    timedTasks.erase(timedTaskToExecute);
+                } else if (!tasks.empty() && !task) {
                     task = move(tasks.front());
                     tasks.pop_front();
-                }
-
-                if (!timedTasks.empty()) {
-                    auto earliestTask = min_element(timedTasks.begin(), timedTasks.end(),
-                        [](const auto &lhs, const auto &rhs) {
-                            return lhs.first < rhs.first;
-                        });
-
-                    executeTime = earliestTask->first;
-
-                    if (executeTime <= chrono::steady_clock::now()) {
-                        task = earliestTask->second;
-                        timedTasks.erase(earliestTask);
-                    }
                 }
             }
 
