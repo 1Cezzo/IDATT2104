@@ -1,8 +1,7 @@
+import subprocess
 from flask import Flask, render_template, request
-import docker
 
 app = Flask(__name__)
-client = docker.from_env()
 
 @app.route('/')
 def index():
@@ -12,24 +11,17 @@ def index():
 def run_code():
     user_code = request.form['code']
 
-    # Create a Docker container
+    # Build and run a Docker container
     try:
-        container = client.containers.run(
-            'code-runner',  # Name of the Docker image
-            command='python -c "{}"'.format(user_code),
-            remove=True,
-            detach=True
-        )
-
-        # Capture the output of the Docker container
-        result = container.decode('utf-8')
-        error_message = None
-    except docker.errors.APIError as e:
-        # Handle Docker API errors
+        docker_command = f"docker run --rm python:3.11.7 python -c '{user_code}'"
+        result = subprocess.run(docker_command, shell=True, capture_output=True, text=True)
+        output = result.stdout.strip()
+        error_message = result.stderr.strip() if result.stderr else None
+    except Exception as e:
         error_message = str(e)
-        result = None
+        output = None
 
-    return render_template('result.html', result=result, error_message=error_message)
+    return render_template('result.html', result=output, error_message=error_message)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
