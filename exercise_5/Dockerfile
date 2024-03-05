@@ -1,17 +1,18 @@
-# Use the official Python image as the base
-FROM python:latest
+FROM python:3.11.7
 
-# Set up a working directory
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy the requirements file to the working directory
-COPY requirements.txt .
+# Install Flask and docker
+RUN pip install Flask
 
-# Install any dependencies specified in the requirements file
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install docker
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of the application code
 COPY . .
 
-# Define the command to run the Python script
-CMD ["python", "your_script.py"]
+# Set user
+USER root
+
+# Command to run the application
+CMD ["python", "app.py"]

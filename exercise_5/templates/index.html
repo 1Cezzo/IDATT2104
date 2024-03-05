@@ -1,13 +1,16 @@
-<!-- templates/index.html -->
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Code Compiler</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Execution Result</title>
 </head>
 <body>
-    <h1>Code Compiler</h1>
-    <form action="/compile" method="post">
-        <textarea name="code" rows="10" cols="50"></textarea><br>
-        <input type="submit" value="Compile">
-    </form>
+    <h1>Code Execution Result</h1>
+    {% if error_message %}
+        <div class="error">{{ error_message }}</div>
+    {% else %}
+        <div class="result">{{ result }}</div>
+    {% endif %}
 </body>
 </html>

@@ -1,20 +1,35 @@
 from flask import Flask, render_template, request
+import docker
 
 app = Flask(__name__)
+client = docker.from_env()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/compile', methods=['POST'])
-def compile_code():
-    code = request.form['code']  # Get the source code from the form
-    
-    # Here you would pass the code to the Docker container for compilation
-    # You can use subprocess or other libraries to execute shell commands and interact with Docker
+@app.route('/run', methods=['POST'])
+def run_code():
+    user_code = request.form['code']
 
-    # For demonstration purposes, let's just return the source code as a response
-    return f"Source code received:\n{code}"
+    # Create a Docker container
+    try:
+        container = client.containers.run(
+            'code-runner',  # Name of the Docker image
+            command='python -c "{}"'.format(user_code),
+            remove=True,
+            detach=True
+        )
+
+        # Capture the output of the Docker container
+        result = container.decode('utf-8')
+        error_message = None
+    except docker.errors.APIError as e:
+        # Handle Docker API errors
+        error_message = str(e)
+        result = None
+
+    return render_template('result.html', result=result, error_message=error_message)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0')
