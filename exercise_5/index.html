@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Compiler</title>
+  <style>
+    /* Center everything in the middle of the screen */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Use the full height of the viewport */
+      margin: 0; /* Remove default margin */
+      background-color: #f0f0f0; /* Optional: Set background color */
+    }
+
+    /* Container for the main content */
+    .container {
+      text-align: center; /* Center text inside container */
+    }
+
+    /* Textarea styles */
+    #code {
+      width: 300px; /* Adjust width as needed */
+      height: 150px; /* Adjust height as needed */
+      resize: none; /* Disable textarea resizing */
+    }
+
+    /* Button styles */
+    button {
+      margin-top: 10px; /* Add margin to the top */
+    }
+
+    /* Output area styles */
+    #output {
+      margin-top: 20px; /* Add margin to the top */
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Code Compiler</h1>
+    <textarea id="code" rows="10" cols="50"></textarea><br>
+    <button onclick="runCode()">Run Code</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    async function runCode() {
+      const code = document.getElementById('code').value;
+      
+      const response = await fetch('/runcode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = ''; // Clear previous output
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      const streamReader = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const output = decoder.decode(value);
+          const trimmedOutput = JSON.parse(output).output.trim();
+          outputDiv.innerText = trimmedOutput;
+        }
+      };
+
+      await streamReader();
+    }
+  </script>
+</body>
+</html>

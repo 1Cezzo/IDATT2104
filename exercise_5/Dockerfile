@@ -1,18 +1,23 @@
-FROM python:3.11.7
+# Use the node image as base
+FROM node:latest
 
-# Set working directory
-WORKDIR /app
+# Install Python and other necessary dependencies
+RUN apt-get update && apt-get install -y python3 python3-pip
 
-# Install Flask and docker
-RUN pip install Flask
+# Set the working directory
+WORKDIR /usr/src/app
 
-RUN pip install docker
+# Copy package.json and package-lock.json to container
+COPY package*.json ./
 
-# Copy the rest of the application code
+# Install Node.js dependencies
+RUN npm install
+
+# Copy all other project files to container
 COPY . .
 
-# Set user
-USER root
+# Expose port 3000
+EXPOSE 3000
 
-# Command to run the application
-CMD ["python", "app.py"]
+# Command to run the server
+CMD ["node", "server.js"]
