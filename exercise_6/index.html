@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <form class="content" onsubmit="submitForm(event)">
+      <div>
+        <h1>Exercise 6
+          <br />
+          WebSocket chat
+        </h1>
+        <h2>Connected users: <span id="connected">0</span></h2>
+      </div>
+      <div id="messages"></div>
+      <div class="input">
+        <input
+          placeholder="Message..."
+          id="inputArea"
+          width="100%"
+          name="inputArea"
+          type="text"
+        />
+      </div>
+      <button type="submit">Send message</button>
+      <p id="info"></p>
+    </form>
+    <script>
+      const inputArea = document.getElementById("inputArea");
+      const info = document.getElementById("info");
+      const messages = document.getElementById("messages");
+      const connected = document.getElementById("connected");
+      const ws = new WebSocket("ws://localhost:5000", ["json"]);
+
+      ws.addEventListener("open", () => {
+        setInfo("The connection is ready", 2000);
+      });
+      ws.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if (data.message) {
+          messages.innerHTML += `<div class="message">${data.message}</div>`;
+        } else if (data.connected) {
+          connected.innerHTML = data.connected;
+        }
+      });
+
+      const submitForm = async (e) => {
+        e.preventDefault();
+        if (inputArea.value !== "") {
+        const json = JSON.stringify({ message: inputArea.value });
+        ws.send(json);
+        setInfo("The message was sent");
+        inputArea.value = "";
+      } else {
+          setInfo("You can't send an empty message");
+        }
+      };
+      const setInfo = (text, duration = 5000) => {
+        info.innerHTML = text;
+        if (text !== "") {
+          setTimeout(() => setInfo(""), duration);
+        }
+      };
+    </script>
+  </body>
+</html>
