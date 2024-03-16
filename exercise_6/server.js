@@ -43,15 +43,17 @@ server.on("upgrade", function (req, socket) {
     socket.write(responseHeaders.join("\r\n") + "\r\n\r\n");
     sockets.push(socket);
     try {
-        sockets.forEach(function (s) {
-            return s.write(constructReply({
-                connected: sockets.length,
-            }));
-        });
-    }
-    catch (e) {
+      sockets.forEach(function (s, index) {
+          var connectedUsers = sockets.map(function (_, i) {
+              return "user" + (i + 1);
+          }).join(", ");
+          return s.write(constructReply({
+              connected: connectedUsers,
+          }));
+      });
+    } catch (e) {
         console.log("Error:", e);
-    }
+    }  
     socket.on("data", function (buffer) {
         try {
             var message_1 = parseMessage(buffer);
@@ -64,11 +66,14 @@ server.on("upgrade", function (req, socket) {
             }
             else if (message_1 === null) {
                 sockets = sockets.filter(function (s) { return s !== socket; });
-                sockets.forEach(function (s) {
-                    return s.write(constructReply({
-                        connected: sockets.length,
-                    }));
-                });
+                sockets.forEach(function (s, index) {
+                  var connectedUsers = sockets.map(function (_, i) {
+                      return "user" + (i + 1);
+                  }).join(", ");
+                  return s.write(constructReply({
+                      connected: connectedUsers,
+                  }));
+              });
             }
         }
         catch (e) {

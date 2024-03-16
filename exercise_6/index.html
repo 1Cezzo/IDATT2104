@@ -35,7 +35,7 @@
       const ws = new WebSocket("ws://localhost:5000", ["json"]);
 
       ws.addEventListener("open", () => {
-        setInfo("The connection is ready", 2000);
+        setInfo("You are connected to the server!", 2000);
       });
       ws.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
